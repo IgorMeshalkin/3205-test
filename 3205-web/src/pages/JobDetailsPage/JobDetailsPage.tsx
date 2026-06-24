@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import copyIcon from '../../assets/copy.svg'
+import { useActiveJobPolling } from '../../hooks/useActiveJobPolling.hook'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
 import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
@@ -105,6 +106,14 @@ const formatCount = (value: Job['successUrlCount']) => {
   return String(Object.keys(value).length)
 }
 
+const calculateSuccessCount = (tasks: Task[]) => {
+  return tasks.filter((t) => t.status === 'success').length
+}
+
+const calculateFailedCount = (tasks: Task[]) => {
+  return tasks.filter((t) => t.status === 'error').length
+}
+
 const formatDuration = (value?: number) => {
   if (typeof value !== 'number') {
     return '-'
@@ -123,6 +132,7 @@ export function JobDetailsPage() {
   const { showNotification } = useNotification()
   const dispatch = useAppDispatch()
   const activeJobId = useAppSelector((state) => state.activeJob.activeJobId)
+  const { fullJob: polledJob } = useActiveJobPolling(1000, true)
   const getJobByIdRef = useRef(getJobById)
   const [job, setJob] = useState<Job | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -157,6 +167,11 @@ export function JobDetailsPage() {
       isMounted = false
     }
   }, [id])
+
+  useEffect(() => {
+    if (!polledJob || !id || polledJob.id !== id) return
+    setJob(polledJob)
+  }, [polledJob, id])
 
   const handleCopyUrl = async (url: string) => {
     await navigator.clipboard.writeText(url)
@@ -202,27 +217,18 @@ export function JobDetailsPage() {
           <h1 title={job.id}>Задание {job.id}</h1>
         </div>
         <div className={styles.headerActions}>
-          {activeJobId === job.id ? (
-            <span
-              className={`${styles.activeBadge} ${job.status !== 'in_progress' ? styles.activeBadgeDisabled : ''}`}
-            >
-              {job.status !== 'in_progress' ? (
-                <span className={styles.activeBadgeMarquee}>
-                  Активное ({jobStatusLabels[job.status]})
-                </span>
-              ) : (
-                'Активное'
-              )}
-            </span>
+          {activeJobId === job.id && job.status === 'in_progress' ? (
+            <span className={styles.activeBadge}>Активное</span>
           ) : (
-            <button
-              className={styles.activateButton}
-              type="button"
-              disabled={job.status !== 'in_progress'}
-              onClick={() => dispatch(setActiveJob(job.id))}
-            >
-              Сделать активным
-            </button>
+            job.status === 'in_progress' && (
+              <button
+                className={styles.activateButton}
+                type="button"
+                onClick={() => dispatch(setActiveJob(job.id))}
+              >
+                Сделать активным
+              </button>
+            )
           )}
           <span className={`${styles.status} ${jobStatusClassNames[job.status]}`}>
             {jobStatusLabels[job.status]}
@@ -237,11 +243,11 @@ export function JobDetailsPage() {
         </div>
         <div className={styles.summaryItem}>
           <span>Успешно</span>
-          <strong>{formatCount(job.successUrlCount)}</strong>
+          <strong>{calculateSuccessCount(job.tasks)}</strong>
         </div>
         <div className={styles.summaryItem}>
           <span>Ошибки</span>
-          <strong>{formatCount(job.failedUrlCount)}</strong>
+          <strong>{calculateFailedCount(job.tasks)}</strong>
         </div>
         <div className={styles.summaryItem}>
           <span>Всего URL</span>

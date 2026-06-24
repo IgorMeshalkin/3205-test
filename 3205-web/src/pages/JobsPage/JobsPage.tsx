@@ -332,26 +332,8 @@ export function JobsPage() {
                   <img src={stopIcon} alt="" />
                 </button>
               )}
-              {activeJobId === job.id ? (
-                job.status !== 'in_progress' ? (
-                  <button
-                    className={`${styles.activeBadge} ${styles.activeBadgeDisabled}`}
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      dispatch(clearActiveJob())
-                    }}
-                  >
-                    <span className={styles.activeBadgeMarquee}>
-                      Активное ({statusLabels[job.status]})
-                    </span>
-                    <span className={styles.activeBadgeDeactivateText}>
-                      Сделать не активным
-                    </span>
-                  </button>
-                ) : (
-                  <span className={styles.activeBadge}>Активное</span>
-                )
+              {activeJobId === job.id && job.status === 'in_progress' ? (
+                <span className={styles.activeBadge}>Активное</span>
               ) : (
                 job.status === 'in_progress' && (
                   <button

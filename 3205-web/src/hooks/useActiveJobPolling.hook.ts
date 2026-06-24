@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiUrls } from '../shared/api/api'
-import { useAppSelector } from '../store'
+import { useAppDispatch, useAppSelector } from '../store'
+import { clearActiveJob } from '../store/activeJob.slice'
 import type { components } from '../shared/types/api'
 
 type GetJobDTO = components['schemas']['GetJobDTO']
@@ -22,10 +23,12 @@ const toJobDTO = (fullJob: GetFullJobDTO): GetJobDTO => ({
   ).length as unknown as GetJobDTO['failedUrlCount'],
 })
 
-export const useActiveJobPolling = (intervalMs = 1000) => {
+export const useActiveJobPolling = (intervalMs = 1000, returnFullJob = false) => {
+  const dispatch = useAppDispatch()
   const activeJobId = useAppSelector((state) => state.activeJob.activeJobId)
 
   const [job, setJob] = useState<GetJobDTO | null>(null)
+  const [fullJob, setFullJob] = useState<GetFullJobDTO | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<unknown>(null)
 
@@ -53,10 +56,16 @@ export const useActiveJobPolling = (intervalMs = 1000) => {
 
         if (prevStatusRef.current === 'in_progress' && jobDTO.status !== 'in_progress') {
           clearPolling()
+          dispatch(clearActiveJob())
         }
 
         prevStatusRef.current = jobDTO.status
         setJob(jobDTO)
+
+        if (returnFullJob) {
+          setFullJob(response.data)
+        }
+
         return jobDTO
       } catch (err) {
         setError(err)
@@ -65,7 +74,7 @@ export const useActiveJobPolling = (intervalMs = 1000) => {
         setIsLoading(false)
       }
     },
-    [clearPolling],
+    [clearPolling, returnFullJob, dispatch],
   )
 
   const startPolling = useCallback(
@@ -104,5 +113,5 @@ export const useActiveJobPolling = (intervalMs = 1000) => {
     return clearPolling
   }, [activeJobId, fetchJob, clearPolling, startPolling])
 
-  return { job, isLoading, error, refresh }
+  return { job, fullJob, isLoading, error, refresh }
 }
