@@ -48,7 +48,9 @@ export class DataStorageService {
 
     // возвращает все Jobs
     async findJobs(): Promise<JobEntity[]> {
-        return Array.from(this.jobs.values());
+        return Array.from(this.jobs.values()).sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        );
     }
 
     // возвращает JobEntity по id

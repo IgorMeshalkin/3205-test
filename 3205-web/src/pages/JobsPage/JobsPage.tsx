@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import copyIcon from '../../assets/copy.svg'
 import stopIcon from '../../assets/stop.svg'
+import { CreateJobForm } from '../../components/create-job-form'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
 import {
   ENotificationType,
@@ -84,11 +85,13 @@ const normalizeJobsResponse = (response: unknown): Job[] => {
 }
 
 export function JobsPage() {
-  const { deleteJobById, getJobs, isGetJobsLoading, getJobsError } = useJobApi()
+  const { createJob, deleteJobById, getJobs, isGetJobsLoading, getJobsError } =
+    useJobApi()
   const { showNotification } = useNotification()
   const getJobsRef = useRef(getJobs)
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isCreateJobFormOpen, setIsCreateJobFormOpen] = useState(false)
   const [stoppingJobId, setStoppingJobId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -127,6 +130,45 @@ export function JobsPage() {
     })
   }
 
+  const handleOpenCreateJobForm = () => {
+    setIsCreateJobFormOpen(true)
+  }
+
+  const handleCloseCreateJobForm = () => {
+    setIsCreateJobFormOpen(false)
+  }
+
+  const handleCreateJob = async (urls: string[]) => {
+    setIsCreateJobFormOpen(false)
+
+    try {
+      await createJob({ urls })
+      showNotification({
+        title: 'Задание создано',
+        message: `Адресов в задании: ${urls.length}`,
+        type: ENotificationType.SUCCESS,
+      })
+    } catch {
+      showNotification({
+        title: 'Не удалось создать задание',
+        message: 'Проверьте адреса и попробуйте еще раз',
+        type: ENotificationType.ERROR,
+      })
+      return
+    }
+
+    try {
+      const jobs = await getJobs()
+      setJobs(normalizeJobsResponse(jobs))
+    } catch {
+      showNotification({
+        title: 'Задание создано',
+        message: 'Не удалось обновить список заданий',
+        type: ENotificationType.WARNING,
+      })
+    }
+  }
+
   const handleStopJob = async (id: string) => {
     setStoppingJobId(id)
 
@@ -143,6 +185,17 @@ export function JobsPage() {
         type: ENotificationType.SUCCESS,
       })
     } catch {
+      try {
+        const jobs = await getJobs()
+        setJobs(normalizeJobsResponse(jobs))
+      } catch {
+        showNotification({
+          title: 'Не удалось обновить список заданий',
+          message: 'Попробуйте обновить страницу',
+          type: ENotificationType.WARNING,
+        })
+      }
+
       showNotification({
         title: 'Не удалось отменить задание',
         message: `Попробуйте отменить задание ${formatJobId(id)} еще раз`,
@@ -174,10 +227,21 @@ export function JobsPage() {
       <section className={styles.centerState}>
         <div className={styles.emptyState}>
           <p className={styles.stateText}>У вас пока нет заданий</p>
-          <button className={styles.primaryButton} type="button">
+          <button
+            className={styles.primaryButton}
+            onClick={handleOpenCreateJobForm}
+            type="button"
+          >
             Создать задание
           </button>
         </div>
+        <CreateJobForm
+          isOpen={isCreateJobFormOpen}
+          onCreate={(urls) => {
+            void handleCreateJob(urls)
+          }}
+          onClose={handleCloseCreateJobForm}
+        />
       </section>
     )
   }
@@ -186,7 +250,11 @@ export function JobsPage() {
     <section className={styles.page}>
       <header className={styles.header}>
         <h1>Ваши задания</h1>
-        <button className={styles.primaryButton} type="button">
+        <button
+          className={styles.primaryButton}
+          onClick={handleOpenCreateJobForm}
+          type="button"
+        >
           Создать задание
         </button>
       </header>
@@ -236,6 +304,13 @@ export function JobsPage() {
           </article>
         ))}
       </div>
+      <CreateJobForm
+        isOpen={isCreateJobFormOpen}
+        onCreate={(urls) => {
+          void handleCreateJob(urls)
+        }}
+        onClose={handleCloseCreateJobForm}
+      />
     </section>
   )
 }
