@@ -1,11 +1,15 @@
 import { memo } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 const navigationItems = [
   { to: '/', label: 'Задания', end: true },
 ]
 
 export const AppLayout = memo(() => {
+  const location = useLocation()
+  const isJobsRoute =
+    location.pathname === '/' || location.pathname.startsWith('/jobs/')
+
   return (
     <div className="app-layout">
       <aside className="app-sidebar" aria-label="Основная навигация">
@@ -18,7 +22,9 @@ export const AppLayout = memo(() => {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                isActive ? 'app-sidebar__link app-sidebar__link--active' : 'app-sidebar__link'
+                isActive || isJobsRoute
+                  ? 'app-sidebar__link app-sidebar__link--active'
+                  : 'app-sidebar__link'
               }
             >
               {item.label}

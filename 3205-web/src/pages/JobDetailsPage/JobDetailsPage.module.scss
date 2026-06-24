@@ -1,0 +1,254 @@
+.page {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 20px;
+}
+
+.centerState {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.emptyState {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.stateText {
+  margin: 0;
+  color: var(--heading);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.titleBlock {
+  min-width: 0;
+
+  h1 {
+    margin: 8px 0 0;
+    overflow: hidden;
+    color: var(--heading);
+    font-size: 30px;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.backLink,
+.secondaryButton {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.secondaryButton {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryItem {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+
+  span {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  strong {
+    overflow: hidden;
+    color: var(--heading);
+    font-size: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.tasks {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow-y: auto;
+  margin-top: 24px;
+  padding-right: 8px;
+}
+
+.tasksHeader,
+.taskItem {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 130px 112px 168px 168px 88px;
+  align-items: center;
+  gap: 18px;
+}
+
+.tasksHeader {
+  padding: 0 16px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.taskItem {
+  min-height: 76px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.urlBlock {
+  min-width: 0;
+}
+
+.urlTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    overflow: hidden;
+    color: var(--heading);
+    font-size: 16px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.copyButton {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+
+  img {
+    width: 15px;
+    height: 15px;
+    opacity: 0.8;
+  }
+}
+
+.errorMessage {
+  margin: 8px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.metaValue {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dateTimeValue {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.status {
+  justify-self: start;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statusPending {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.statusInProgress {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.statusCompleted {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.statusDanger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@media (max-width: 900px) {
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tasksHeader {
+    display: none;
+  }
+
+  .taskItem {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .titleBlock {
+    h1 {
+      font-size: 26px;
+      white-space: normal;
+      word-break: break-word;
+    }
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
+  }
+}

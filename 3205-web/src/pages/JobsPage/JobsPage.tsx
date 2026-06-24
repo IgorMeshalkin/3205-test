@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import copyIcon from '../../assets/copy.svg'
 import stopIcon from '../../assets/stop.svg'
 import { CreateJobForm } from '../../components/create-job-form'
@@ -88,6 +89,7 @@ export function JobsPage() {
   const { createJob, deleteJobById, getJobs, isGetJobsLoading, getJobsError } =
     useJobApi()
   const { showNotification } = useNotification()
+  const navigate = useNavigate()
   const getJobsRef = useRef(getJobs)
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
@@ -128,6 +130,10 @@ export function JobsPage() {
       message: id,
       type: ENotificationType.SUCCESS,
     })
+  }
+
+  const handleOpenJobDetails = (id: string) => {
+    navigate(`/jobs/${encodeURIComponent(id)}`)
   }
 
   const handleOpenCreateJobForm = () => {
@@ -261,7 +267,25 @@ export function JobsPage() {
 
       <div className={styles.list}>
         {jobs.map((job) => (
-          <article className={styles.item} key={job.id}>
+          <article
+            className={styles.item}
+            key={job.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              handleOpenJobDetails(job.id)
+            }}
+            onKeyDown={(event) => {
+              if (event.target !== event.currentTarget) {
+                return
+              }
+
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                handleOpenJobDetails(job.id)
+              }
+            }}
+          >
             <div className={styles.itemMain}>
               <div className={styles.jobTitle}>
                 <h2 title={job.id}>Задание {formatJobId(job.id)}</h2>
@@ -270,7 +294,8 @@ export function JobsPage() {
                   type="button"
                   aria-label="Копировать id задания"
                   title="Копировать id задания"
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation()
                     void handleCopyJobId(job.id)
                   }}
                 >
@@ -288,7 +313,8 @@ export function JobsPage() {
                   aria-label="Остановить задание"
                   title="Остановить задание"
                   disabled={stoppingJobId === job.id}
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation()
                     void handleStopJob(job.id)
                   }}
                 >
