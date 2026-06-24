@@ -1,27 +1,17 @@
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.scss'
+import { AppLayout } from './layouts/AppLayout'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 function App() {
   return (
-    <main className="app-shell">
-      <section className="hero">
-        <div className="hero__visual" aria-hidden="true">
-          <img src={heroImg} className="hero__base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="hero__react" alt="" />
-          <img src={viteLogo} className="hero__vite" alt="" />
-        </div>
-
-        <div className="hero__content">
-          <p className="hero__eyebrow">React + TypeScript + SCSS</p>
-          <h1>3205-web</h1>
-          <p className="hero__text">
-            Frontend project scaffolded with Vite and ready for development.
-          </p>
-        </div>
-      </section>
-    </main>
+    <Routes>
+      <Route element={<AppLayout />}>
+        {/*<Route index element={<HomePage />} />*/}
+        <Route path="404" element={<NotFoundPage />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Route>
+    </Routes>
   )
 }
 
