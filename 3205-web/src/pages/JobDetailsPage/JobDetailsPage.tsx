@@ -94,18 +94,6 @@ const renderDateTime = (value?: string) => {
   )
 }
 
-const formatCount = (value: Job['successUrlCount']) => {
-  if (value === null) {
-    return '0'
-  }
-
-  if (typeof value === 'number') {
-    return String(value)
-  }
-
-  return String(Object.keys(value).length)
-}
-
 const calculateSuccessCount = (tasks: Task[]) => {
   return tasks.filter((t) => t.status === 'success').length
 }
