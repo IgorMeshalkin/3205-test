@@ -22,7 +22,7 @@ export class JobService {
     }
 
     async getFullJob(id: string): Promise<GetFullJobDTO> {
-        return await this.dataStorageService.findJobById(id);
+        return await this.dataStorageService.findFullJobById(id);
     }
 
     async cancelJob(id: string): Promise<void> {
