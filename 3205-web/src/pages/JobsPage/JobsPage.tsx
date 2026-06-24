@@ -4,11 +4,9 @@ import copyIcon from '../../assets/copy.svg'
 import stopIcon from '../../assets/stop.svg'
 import { CreateJobForm } from '../../components/create-job-form'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
-import {
-  ENotificationType,
-  useNotification,
-} from '../../hooks/useNotification.hook.tsx'
+import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
+import { ENotificationType } from '../../store/notification.slice'
 import styles from './JobsPage.module.scss'
 
 type Job = components['schemas']['GetJobDTO']

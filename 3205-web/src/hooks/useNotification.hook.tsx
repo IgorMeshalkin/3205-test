@@ -1,22 +1,12 @@
-export const ENotificationType = {
-    SUCCESS: 'success',
-    WARNING: 'warning',
-    ERROR: 'error',
-} as const;
-
-export type ENotificationType = typeof ENotificationType[keyof typeof ENotificationType];
-
-export type TNotification = {
-    title: string;
-    message: string;
-    type: ENotificationType;
-}
+import { useAppDispatch } from '../store'
+import { addNotification, type TNotification } from '../store/notification.slice'
 
 export const useNotification = () => {
+  const dispatch = useAppDispatch()
 
-    const showNotification = (notification: TNotification) => {
-        console.log(notification)
-    }
+  const showNotification = (notification: TNotification) => {
+    dispatch(addNotification(notification))
+  }
 
-    return { showNotification }
+  return { showNotification }
 }

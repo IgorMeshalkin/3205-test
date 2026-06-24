@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Notification } from '../components/notification'
 
 const navigationItems = [
   { to: '/', label: 'Задания', end: true },
@@ -36,6 +37,8 @@ export const AppLayout = memo(() => {
       <main className="app-content">
         <Outlet />
       </main>
+
+      <Notification />
     </div>
   )
 })

@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import copyIcon from '../../assets/copy.svg'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
-import {
-  ENotificationType,
-  useNotification,
-} from '../../hooks/useNotification.hook.tsx'
+import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
+import { ENotificationType } from '../../store/notification.slice'
 import styles from './JobDetailsPage.module.scss'
 
 type Job = components['schemas']['GetFullJobDTO']

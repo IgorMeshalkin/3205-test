@@ -1,0 +1,96 @@
+.container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 320px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+// Wrapper handles vertical layout animation (push-up effect)
+.wrapper {
+  overflow: hidden;
+  max-height: 0;
+  margin-bottom: 0;
+
+  &.visible {
+    max-height: 200px;
+    margin-bottom: 8px;
+    transition:
+      max-height 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+      margin-bottom 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &.exiting {
+    max-height: 0;
+    margin-bottom: 0;
+    transition:
+      max-height 0.32s ease-in,
+      margin-bottom 0.32s ease-in;
+  }
+}
+
+// Item handles horizontal slide + opacity
+.item {
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+  user-select: none;
+  transform: translateX(calc(100% + 24px));
+  opacity: 0;
+
+  &.visible {
+    transform: translateX(0);
+    opacity: 1;
+    transition:
+      transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.3s ease;
+  }
+
+  &.exiting {
+    transform: translateX(calc(100% + 24px));
+    opacity: 0;
+    transition:
+      transform 0.3s ease-in,
+      opacity 0.22s ease-in;
+  }
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: inherit;
+}
+
+.message {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: inherit;
+  opacity: 0.82;
+}
+
+// Type variants
+.success {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: #14532d;
+}
+
+.error {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: #7f1d1d;
+}
+
+.warning {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #78350f;
+}
