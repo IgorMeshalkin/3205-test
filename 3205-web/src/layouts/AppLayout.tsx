@@ -9,7 +9,7 @@ export const AppLayout = memo(() => {
   return (
     <div className="app-layout">
       <aside className="app-sidebar" aria-label="Основная навигация">
-        <div className="app-sidebar__brand">3205</div>
+        <div className="app-sidebar__brand">3205.test</div>
 
         <nav className="app-sidebar__nav">
           {navigationItems.map((item) => (

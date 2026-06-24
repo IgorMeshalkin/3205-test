@@ -16,7 +16,7 @@ export class JobService {
 
     async createJob(dto: CreateJobDTO): Promise<GetJobDTO> {
         // создаёт JobEntity
-        const createdJob =  await this.dataStorageService.saveJob(dto);
+        const createdJob = await this.dataStorageService.saveJob(dto);
         // запускает обработку JobEntity
         void this.jobWorkerService.handleJob(createdJob.id);
         // возвращает GetJobDTO
@@ -32,6 +32,13 @@ export class JobService {
     }
 
     async cancelJob(id: string): Promise<void> {
+        const job = await this.dataStorageService.findJobById(id);
+        if (!job) {
+            throw new Error(`Job with id ${id} not found`);
+        }
+        if (job.status !== EJobStatus.PENDING && job.status !== EJobStatus.IN_PROGRESS) {
+            throw new Error(`Job with id ${id} is not in pending or in progress status and cannot be cancelled`);
+        }
         await this.dataStorageService.changeJobStatus(id, EJobStatus.CANCELLED);
     }
 }
