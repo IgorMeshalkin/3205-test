@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import copyIcon from '../../assets/copy.svg'
 import stopIcon from '../../assets/stop.svg'
 import { CreateJobForm } from '../../components/create-job-form'
+import { useActiveJobPolling } from '../../hooks/useActiveJobPolling.hook'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
 import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
@@ -92,6 +93,7 @@ export function JobsPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const activeJobId = useAppSelector((state) => state.activeJob.activeJobId)
+  const { job: polledJob } = useActiveJobPolling()
   const getJobsRef = useRef(getJobs)
   const [jobs, setJobs] = useState<Job[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
@@ -124,6 +126,13 @@ export function JobsPage() {
       isMounted = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!polledJob) return
+    setJobs((prev) =>
+      prev.map((job) => (job.id === polledJob.id ? polledJob : job)),
+    )
+  }, [polledJob])
 
   const handleCopyJobId = async (id: string) => {
     await navigator.clipboard.writeText(id)
