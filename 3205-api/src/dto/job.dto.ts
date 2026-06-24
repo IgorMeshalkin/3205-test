@@ -1,20 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-export enum EJobStatus {
-    PENDING = 'pending',
-    IN_PROGRESS = 'in_progress',
-    COMPLETED = 'completed',
-    CANCELLED = 'cancelled',
-    FAILED = 'failed',
-}
-
-export enum ETaskStatus {
-    PENDING = 'pending',
-    IN_PROGRESS = 'in_progress',
-    SUCCESS = 'success',
-    ERROR = 'error',
-    CANCELLED = 'cancelled',
-}
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import {EJobStatus, JobEntity} from "../entity/job.entity";
+import {ETaskStatus, TaskEntity} from "../entity/task.entity";
 
 export class CreateJobDTO {
     @ApiProperty({
@@ -50,14 +36,26 @@ export class GetJobDTO {
     @ApiProperty({
         description: 'Number of URLs processed successfully.',
         example: 8,
+        nullable: true,
     })
-    successUrlCount: number;
+    successUrlCount: number | null;
 
     @ApiProperty({
         description: 'Number of URLs that failed during processing.',
         example: 2,
+        nullable: true,
     })
-    failedUrlCount: number;
+    failedUrlCount: number | null;
+
+    static fromEntity(entity: JobEntity): GetJobDTO {
+        const dto = new GetJobDTO();
+        dto.id = entity.id;
+        dto.createdAt = entity.createdAt;
+        dto.status = entity.status;
+        dto.successUrlCount = entity.successUrlCount;
+        dto.failedUrlCount = entity.failedUrlCount;
+        return dto;
+    }
 }
 
 export class GetTaskDTO {
@@ -74,27 +72,27 @@ export class GetTaskDTO {
     })
     status: ETaskStatus;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Date and time when task processing started.',
         example: '2026-06-24T10:15:30.000Z',
         type: String,
         format: 'date-time',
     })
-    startTime: Date;
+    startTime?: Date;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Date and time when task processing ended.',
         example: '2026-06-24T10:15:31.250Z',
         type: String,
         format: 'date-time',
     })
-    endTime: Date;
+    endTime?: Date;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Task processing duration in milliseconds.',
         example: 1250,
     })
-    duration: number;
+    duration?: number;
 
     @ApiPropertyOptional({
         description: 'HTTP status code returned by the URL request.',
@@ -107,6 +105,18 @@ export class GetTaskDTO {
         example: 'Request timeout',
     })
     errorMessage?: string;
+
+    static fromEntity(entity: TaskEntity): GetTaskDTO {
+        const dto = new GetTaskDTO();
+        dto.url = entity.url;
+        dto.status = entity.status;
+        dto.startTime = entity.startTime;
+        dto.endTime = entity.endTime;
+        dto.duration = entity.duration;
+        dto.httpStatus = entity.httpStatus;
+        dto.errorMessage = entity.errorMessage;
+        return dto;
+    }
 }
 
 export class GetFullJobDTO extends GetJobDTO {
@@ -115,4 +125,13 @@ export class GetFullJobDTO extends GetJobDTO {
         type: [GetTaskDTO],
     })
     tasks: GetTaskDTO[];
+
+    static fromEntity(job: JobEntity, tasks: TaskEntity[] = []): GetFullJobDTO {
+        const jobDTO = GetJobDTO.fromEntity(job);
+        const tasksDTO = tasks.map(task => GetTaskDTO.fromEntity(task));
+        return {
+            ...jobDTO,
+            tasks: tasksDTO,
+        }
+    }
 }

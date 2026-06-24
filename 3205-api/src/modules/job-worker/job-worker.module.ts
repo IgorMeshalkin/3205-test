@@ -5,7 +5,7 @@ import {TaskWorkerService} from "./task-worker.service";
 
 @Module({
     imports: [DataStorageModule],
-    providers: [JobWorkerService],
+    providers: [JobWorkerService, TaskWorkerService],
     exports: [JobWorkerService, TaskWorkerService],
 })
 export class JobWorkerModule {
