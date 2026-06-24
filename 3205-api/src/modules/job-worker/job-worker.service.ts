@@ -90,13 +90,25 @@ export class JobWorkerService {
         // получает задачи(urls) по которым обработка ещё не начиналась, определяя их по статусу PENDING
         const jobTasks = await this.dataStorageService.findTasksByJobId(jobId);
         const pendingTasks = jobTasks.filter(task => task.status === ETaskStatus.PENDING);
+        const taskIdsToCancel = new Set([...currentChunk, ...pendingTasks].map(task => task.id));
+        const tasksToCancel = jobTasks.filter(task => taskIdsToCancel.has(task.id));
 
         // всем задачам(url) которые обрабатывались, в момент отмены Job,
         // а так же тем обработка которых не успела начаться,
         // присваивает статус CANCELLED
-        for (const task of [...currentChunk, ...pendingTasks]) {
+        for (const task of tasksToCancel) {
             try {
-                await this.dataStorageService.changeTaskStatus(task.id, ETaskStatus.CANCELLED);
+                const taskWithoutHttpStatus = {...task};
+                delete taskWithoutHttpStatus.httpStatus;
+                delete taskWithoutHttpStatus.startTime;
+                delete taskWithoutHttpStatus.endTime;
+                delete taskWithoutHttpStatus.executionTimeMs;
+                delete taskWithoutHttpStatus.errorMessage;
+
+                await this.dataStorageService.updateTask({
+                    ...taskWithoutHttpStatus,
+                    status: ETaskStatus.CANCELLED,
+                });
             } catch (error) {
                 this.logger.error(`Error changing task status to CANCELLED for task with id ${task.id}:`, error);
             }
