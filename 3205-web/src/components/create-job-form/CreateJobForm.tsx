@@ -40,10 +40,19 @@ export function CreateJobForm({
   onCreate,
 }: CreateJobFormProps) {
   const highlightRef = useRef<HTMLDivElement>(null)
+  const lastTrimmedRef = useRef<string | null>(null)
   const [urls, setUrls] = useState('')
   const [validatedLines, setValidatedLines] = useState<LineValidation[]>([])
   const [isInvalidLinesAcknowledged, setIsInvalidLinesAcknowledged] =
     useState(false)
+
+  useEffect(() => {
+    if (!isOpen) {
+      setUrls('')
+      setValidatedLines([])
+      setIsInvalidLinesAcknowledged(false)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,10 +75,25 @@ export function CreateJobForm({
   const lines = urls.split('\n')
 
   useEffect(() => {
+    if (lastTrimmedRef.current === urls) {
+      lastTrimmedRef.current = null
+      return
+    }
+
     const currentLines = urls.split('\n')
     const validationTimer = window.setTimeout(() => {
+      const trimmedLines = currentLines
+        .map((line) => line.replace(/^[^a-zA-Z\d]+|[^a-zA-Z\d]+$/g, ''))
+        .filter((line) => line.length > 0)
+      const trimmedUrls = trimmedLines.join('\n')
+
+      if (trimmedUrls !== urls) {
+        lastTrimmedRef.current = trimmedUrls
+        setUrls(trimmedUrls)
+      }
+
       setValidatedLines(
-        currentLines.map((line) => ({
+        trimmedLines.map((line) => ({
           isValid: isValidUrl(line),
           value: line,
         })),
@@ -212,6 +236,7 @@ export function CreateJobForm({
             {shouldShowInvalidLinesWarning && (
               <p className={styles.warningText}>{warningText}</p>
             )}
+            {hasPendingLines && <span aria-hidden="true" className={styles.spinner} />}
             <button
               className={styles.submitButton}
               disabled={
