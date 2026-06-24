@@ -7,7 +7,7 @@ import { useActiveJobPolling } from '../../hooks/useActiveJobPolling.hook'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
 import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
-import { setActiveJob } from '../../store/activeJob.slice'
+import { clearActiveJob, setActiveJob } from '../../store/activeJob.slice'
 import { useAppDispatch, useAppSelector } from '../../store'
 import { ENotificationType } from '../../store/notification.slice'
 import styles from './JobsPage.module.scss'
@@ -332,36 +332,47 @@ export function JobsPage() {
                   <img src={stopIcon} alt="" />
                 </button>
               )}
-              <span className={`${styles.status} ${statusClassNames[job.status]}`}>
-                {statusLabels[job.status]}
-              </span>
-              <span>Успешно: {formatCount(job.successUrlCount)}</span>
-              <span>Ошибки: {formatCount(job.failedUrlCount)}</span>
               {activeJobId === job.id ? (
-                <span
-                  className={`${styles.activeBadge} ${job.status !== 'in_progress' ? styles.activeBadgeDisabled : ''}`}
-                >
-                  {job.status !== 'in_progress' ? (
+                job.status !== 'in_progress' ? (
+                  <button
+                    className={`${styles.activeBadge} ${styles.activeBadgeDisabled}`}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      dispatch(clearActiveJob())
+                    }}
+                  >
                     <span className={styles.activeBadgeMarquee}>
                       Активное ({statusLabels[job.status]})
                     </span>
-                  ) : (
-                    'Активное'
-                  )}
-                </span>
+                    <span className={styles.activeBadgeDeactivateText}>
+                      Сделать не активным
+                    </span>
+                  </button>
+                ) : (
+                  <span className={styles.activeBadge}>Активное</span>
+                )
               ) : (
-                <button
-                  className={styles.activateButton}
-                  type="button"
-                  disabled={job.status !== 'in_progress'}
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    dispatch(setActiveJob(job.id))
-                  }}
-                >
-                  Сделать активным
-                </button>
+                job.status === 'in_progress' && (
+                  <button
+                    className={styles.activateButton}
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      dispatch(setActiveJob(job.id))
+                    }}
+                  >
+                    Сделать активным
+                  </button>
+                )
               )}
+              <div className={styles.statusGroup}>
+                <span className={`${styles.status} ${statusClassNames[job.status]}`}>
+                  {statusLabels[job.status]}
+                </span>
+                <span className={styles.statusItem}>Успешно: {formatCount(job.successUrlCount)}</span>
+                <span className={styles.statusItem}>Ошибки: {formatCount(job.failedUrlCount)}</span>
+              </div>
             </div>
           </article>
         ))}
