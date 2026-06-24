@@ -186,6 +186,92 @@
   }
 }
 
+.activeBadge {
+  position: relative;
+  overflow: hidden;
+  margin-left: 4rem;
+  width: 148px;
+  padding: 5px 8px;
+  border: 1px solid var(--success);
+  border-radius: 6px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 80%
+    );
+    animation: active-badge-shimmer 1s ease-in-out infinite;
+  }
+}
+
+@keyframes active-badge-shimmer {
+  0% { left: -80%; }
+  40% { left: 140%; }
+  100% { left: 140%; }
+}
+
+.activeBadgeDisabled {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+
+  &::after {
+    animation-play-state: paused;
+  }
+}
+
+.activeBadgeMarquee {
+  display: block;
+  white-space: nowrap;
+  animation: badge-marquee 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes badge-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-52px); }
+}
+
+.activateButton {
+  margin-left: 4rem;
+  width: 148px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-soft);
+  }
+
+  &:disabled {
+    border-color: var(--border);
+    color: var(--text);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
 .statusPending {
   background: #f1f5f9;
   color: #475569;

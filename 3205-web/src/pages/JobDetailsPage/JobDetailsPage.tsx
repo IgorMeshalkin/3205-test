@@ -4,6 +4,8 @@ import copyIcon from '../../assets/copy.svg'
 import { useJobApi } from '../../hooks/useJobApi.hook.tsx'
 import { useNotification } from '../../hooks/useNotification.hook.tsx'
 import type { components } from '../../shared/types/api'
+import { setActiveJob } from '../../store/activeJob.slice'
+import { useAppDispatch, useAppSelector } from '../../store'
 import { ENotificationType } from '../../store/notification.slice'
 import styles from './JobDetailsPage.module.scss'
 
@@ -119,6 +121,8 @@ export function JobDetailsPage() {
   const { id } = useParams()
   const { getJobById, getJobByIdError, isGetJobByIdLoading } = useJobApi()
   const { showNotification } = useNotification()
+  const dispatch = useAppDispatch()
+  const activeJobId = useAppSelector((state) => state.activeJob.activeJobId)
   const getJobByIdRef = useRef(getJobById)
   const [job, setJob] = useState<Job | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -197,9 +201,33 @@ export function JobDetailsPage() {
           </Link>
           <h1 title={job.id}>Задание {job.id}</h1>
         </div>
-        <span className={`${styles.status} ${jobStatusClassNames[job.status]}`}>
-          {jobStatusLabels[job.status]}
-        </span>
+        <div className={styles.headerActions}>
+          {activeJobId === job.id ? (
+            <span
+              className={`${styles.activeBadge} ${job.status !== 'in_progress' ? styles.activeBadgeDisabled : ''}`}
+            >
+              {job.status !== 'in_progress' ? (
+                <span className={styles.activeBadgeMarquee}>
+                  Активное ({jobStatusLabels[job.status]})
+                </span>
+              ) : (
+                'Активное'
+              )}
+            </span>
+          ) : (
+            <button
+              className={styles.activateButton}
+              type="button"
+              disabled={job.status !== 'in_progress'}
+              onClick={() => dispatch(setActiveJob(job.id))}
+            >
+              Сделать активным
+            </button>
+          )}
+          <span className={`${styles.status} ${jobStatusClassNames[job.status]}`}>
+            {jobStatusLabels[job.status]}
+          </span>
+        </div>
       </header>
 
       <div className={styles.summary}>
