@@ -89,10 +89,10 @@ export class GetTaskDTO {
     endTime?: Date;
 
     @ApiPropertyOptional({
-        description: 'Task processing duration in milliseconds.',
+        description: 'Task execution time in milliseconds.',
         example: 1250,
     })
-    duration?: number;
+    executionTimeMs?: number;
 
     @ApiPropertyOptional({
         description: 'HTTP status code returned by the URL request.',
@@ -112,7 +112,7 @@ export class GetTaskDTO {
         dto.status = entity.status;
         dto.startTime = entity.startTime;
         dto.endTime = entity.endTime;
-        dto.duration = entity.duration;
+        dto.executionTimeMs = entity.executionTimeMs;
         dto.httpStatus = entity.httpStatus;
         dto.errorMessage = entity.errorMessage;
         return dto;

@@ -2,6 +2,7 @@ import {Injectable, Logger} from '@nestjs/common';
 import {DataStorageService} from '../data-storage/data-storage.service';
 import {EJobStatus} from '../../entity/job.entity';
 import {ETaskStatus, TaskEntity} from "../../entity/task.entity";
+import {TaskWorkerService} from "./task-worker.service";
 
 @Injectable()
 export class JobWorkerService {
@@ -14,7 +15,7 @@ export class JobWorkerService {
 
     private readonly logger = new Logger(JobWorkerService.name);
 
-    constructor(private readonly dataStorageService: DataStorageService) {
+    constructor(private readonly dataStorageService: DataStorageService, private readonly taskService: TaskWorkerService) {
     }
 
     async handleJob(id: string): Promise<void> {
@@ -46,7 +47,7 @@ export class JobWorkerService {
                 const chunk = tasks.slice(i, i + this.CHUNK_TASKS_SIZE);
                 await Promise.allSettled(
                     chunk.map(async task => {
-                        console.log(task);
+                        await this.taskService.handleTask(task, this.TASK_MIN_MS, this.TASK_MAX_MS);
                     }),
                 );
 
@@ -64,13 +65,14 @@ export class JobWorkerService {
             if (currentJob && currentJob.status === EJobStatus.IN_PROGRESS) {
                 const tasks = await this.dataStorageService.findTasksByJobId(id);
                 const successUrlCount = tasks.filter(task => task.status === ETaskStatus.SUCCESS).length;
+                const failedUrlCount = tasks.filter(task => task.status === ETaskStatus.ERROR).length;
 
                 // обновляет успешно обработанную JobEntity
                 await this.dataStorageService.updateJob({
                     ...currentJob,
                     status: EJobStatus.COMPLETED,
                     successUrlCount,
-                    failedUrlCount: tasks.length - successUrlCount,
+                    failedUrlCount,
                 });
             }
         } catch (error) {
@@ -85,9 +87,14 @@ export class JobWorkerService {
         // т.к. пользователь отменил задачу во время их выполнения.
         await new Promise(resolve => setTimeout(resolve, this.TASK_MAX_MS + 100));
 
-        // всем задачам(url) которые обрабатывались, в момент отмены Job
+        // получает задачи(urls) по которым обработка ещё не начиналась, определяя их по статусу PENDING
+        const jobTasks = await this.dataStorageService.findTasksByJobId(jobId);
+        const pendingTasks = jobTasks.filter(task => task.status === ETaskStatus.PENDING);
+
+        // всем задачам(url) которые обрабатывались, в момент отмены Job,
+        // а так же тем обработка которых не успела начаться,
         // присваивает статус CANCELLED
-        for (const task of currentChunk) {
+        for (const task of [...currentChunk, ...pendingTasks]) {
             try {
                 await this.dataStorageService.changeTaskStatus(task.id, ETaskStatus.CANCELLED);
             } catch (error) {

@@ -104,4 +104,12 @@ export class DataStorageService {
         }
         this.jobs.set(job.id, job);
     }
+
+    // обновляет TaskEntity
+    async updateTask(task: TaskEntity): Promise<void> {
+        if (!this.tasks.has(task.id)) {
+            throw new NotFoundError(`Task not found by id: ${task.id}`);
+        }
+        this.tasks.set(task.id, task);
+    }
 }

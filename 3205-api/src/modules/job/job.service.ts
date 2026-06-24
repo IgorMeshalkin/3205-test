@@ -3,6 +3,7 @@ import {DataStorageService} from "../data-storage/data-storage.service";
 import {JobWorkerService} from "../job-worker/job-worker.service";
 import {TaskWorkerService} from "../job-worker/task-worker.service";
 import {CreateJobDTO, GetFullJobDTO, GetJobDTO} from "../../dto/job.dto";
+import {EJobStatus} from "../../entity/job.entity";
 
 @Injectable()
 export class JobService {
@@ -14,7 +15,12 @@ export class JobService {
     }
 
     async createJob(dto: CreateJobDTO): Promise<GetJobDTO> {
-        return await this.dataStorageService.saveJob(dto);
+        // создаёт JobEntity
+        const createdJob =  await this.dataStorageService.saveJob(dto);
+        // запускает обработку JobEntity
+        void this.jobWorkerService.handleJob(createdJob.id);
+        // возвращает GetJobDTO
+        return GetJobDTO.fromEntity(createdJob);
     }
 
     async getAllJobs(): Promise<GetJobDTO[]> {
@@ -26,6 +32,6 @@ export class JobService {
     }
 
     async cancelJob(id: string): Promise<void> {
-        // TODO implement
+        await this.dataStorageService.changeJobStatus(id, EJobStatus.CANCELLED);
     }
 }

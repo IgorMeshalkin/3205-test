@@ -13,7 +13,7 @@ export class TaskEntity {
     jobId: string;
     startTime?: Date;
     endTime?: Date;
-    duration?: number;
+    executionTimeMs?: number;
     httpStatus?: number;
     errorMessage?: string;
 }
